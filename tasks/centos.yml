@@ -19,4 +19,5 @@
 - name: ntpd service
   service:
     name=ntpd
+    enabled=yes
     state=started
