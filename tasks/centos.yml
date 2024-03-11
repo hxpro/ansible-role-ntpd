@@ -1,23 +1,50 @@
 ---
-- name: Install ntp
-  yum:
-    name=ntp
-    state=present
+- block:
+    - name: Install ntp
+      yum:
+        name: ntp
+        state: present
 
-- name: Generate /etc/ntp.conf
-  template:
-    dest=/etc/ntp.conf
-    src=ntp.conf.j2
-    owner=root
-    group=root
-    seuser=system_u
-    serole=object_r
-    setype=net_conf_t
-    mode=0644
-  notify: restart ntpd
+    - name: Generate /etc/ntp.conf
+      template:
+        dest: /etc/ntp.conf
+        src: ntp.conf.j2
+        owner: root
+        group: root
+        seuser: system_u
+        serole: object_r
+        setype: net_conf_t
+        mode: 0644
+      notify: restart ntpd
 
-- name: ntpd service
-  service:
-    name=ntpd
-    enabled=yes
-    state=started
+    - name: ntpd service
+      systemd:
+        name: ntpd
+        enabled: True
+        state: started
+  when: ansible_facts['distribution_major_version'] == '7'
+
+- block:
+    - name: Install Chrony
+      package:
+        name: chrony
+
+    - name: Generate /etc/chrony.conf
+      template:
+        dest: /etc/chrony.conf
+        src: chrony.conf.j2
+        owner: root
+        group: root
+        seuser: system_u
+        serole: object_r
+        setype: net_conf_t
+        mode: 0644
+      notify: restart chronyd
+
+    - name: chronyd service
+      systemd:
+        name: chronyd
+        enabled: True
+        state: started
+
+  when: ansible_facts['distribution_major_version'] >= '8'

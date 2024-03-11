@@ -1,5 +1,10 @@
 ---
 - name: restart ntpd
-  service:
-    name=ntpd
-    state=restarted
+  systemd:
+    name: ntpd
+    state: restarted
+
+- name: restart chronyd
+  systemd:
+    name: chronyd
+    state: restarted
